@@ -2,7 +2,16 @@ public with sharing class DemoController {
     /**
      * An empty constructor for the testing
      */
-    public DemoController() {}
+    public List<String> AllowedFields {
+        get;
+        set;
+    }
+
+    public DemoController() {
+        AllowedFields = new List<String>();
+        AllowedFields.add('FirstName');
+        AllowedFields.add('LastName');
+    }
 
     /**
      * Set the contact for the page using the lastName parameter, if there is one
@@ -18,6 +27,10 @@ public with sharing class DemoController {
             // this will set the Id, so now you can use the standard controller and just reference fields on the page
             ApexPages.currentPage().getParameters().put('id', theContact.Id);
         }
+
+        AllowedFields = new List<String>();
+        AllowedFields.add('FirstName');
+        AllowedFields.add('LastName');
     }
 
     /**

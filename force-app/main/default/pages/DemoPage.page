@@ -3,28 +3,69 @@
   <apex:sectionHeader title="Contact Edit" subtitle="New SFDX Demo Member" />
   <apex:image value="http://bit.ly/17iLknp" styleClass="logo" />
 
-  <!-- Begin Form -->
-  <apex:form >
-    <apex:pageBlock title="Rules of SFDX Demo" mode="edit">
-      <!-- SFDX99 Rules -->
-      <apex:outputPanel styleClass="rules">
-        <p>The 1st rule of SFDX Demo is: You do not talk about SFDX Demo.</p>
-        <p>The 2nd rule of SFDX Demo is: You do not talk about SFDX Demo.</p>
-        <p>The 3rd rule of SFDX Demo is: You do not talk about SFDX Demo.</p>
-      </apex:outputPanel>
 
-      <!-- Fields -->
-      <apex:pageBlockSection columns="3" showHeader="true" title="Membership Status">
-        <apex:inputField styleClass="firstName" value="{!contact.FirstName}" required="true" />
-        <apex:inputField styleClass="lastName" value="{!contact.LastName}"  required="true" />
-      </apex:pageBlockSection>
+  <apex:remoteObjects>
+    <apex:remoteObjectModel name="Contact">
+      <apex:repeat var="k" value="{!AllowedFields}">
+        <apex:remoteObjectField name="{!k}"></apex:remoteObjectField>
+      </apex:repeat>
+    </apex:remoteObjectModel>
+  </apex:remoteObjects>
 
-      <!-- Button Section -->
-      <apex:pageBlockButtons location="bottom">
-        <apex:commandButton value="Add SFDX Demo Member" action="{!save}" />
-      </apex:pageBlockButtons>
-    </apex:pageBlock>
-  </apex:form>
+  <!--
+  <apex:remoteObjects>
+    <apex:remoteObjectModel name="Contact">
+      <apex:remoteObjectField name="Designation__c" jsShorthand="Designation"></apex:remoteObjectField>
+      <apex:remoteObjectField name="LastName"></apex:remoteObjectField>
+      <apex:remoteObjectField name="FirstName"></apex:remoteObjectField>
+      <apex:remoteObjectField name="Email"></apex:remoteObjectField>
+    </apex:remoteObjectModel>
+  </apex:remoteObjects>
+  -->
+
+  <script>
+    function getTemplate() {
+      fetch('https://sfdc.devnewscred.com:8443/api/v1/users/4/email_templates', {
+        method: 'GET',
+        headers: new Headers({
+          'Authorization': 'ABCM f90d8df03b284f8db732b9804ff3b1da',
+          'Content-Type': 'application/json'
+        })
+      })
+      .then((res) => res.json())
+      .then(res => {
+        var div = document.getElementById('email-template');
+        div.innerHTML = JSON.stringify(res, null, 2);
+      });
+    }
+
+    function getContact() {
+      let ul = document.getElementById('email-template');
+      let contact = new SObjectModel.Contact();
+      contact.retrieve({limit: 10}, (err, records, ev) => {
+        if (err) {
+          return alert(err);
+        }
+        records.forEach(record => {
+            let text = `Name: ${record.get('FirstName')} ${ record.get('LastName')}, Email: ${record.get('Email')}, Designation: ${record.get('Designation')}`;
+            let textNode = document.createTextNode(text);
+            let li = document.createElement('li');
+            li.appendChild(textNode);
+            ul.appendChild(li);
+        });
+      });
+    }
+
+  </script>
+
+
+
+
+  <button onclick="getTemplate()">Get Templates</button>
+  <button onclick="getContact()">Get Contact</button>
+
+  <div id="email-template"></div>
+  <ul id="contact"></ul>
 
   <!-- CSS -->
   <style>
@@ -33,6 +74,7 @@
       width: 60px;
       margin: -65px 20px 0 0;
     }
+
     .rules {
       color: red;
       font-size: 18px;
